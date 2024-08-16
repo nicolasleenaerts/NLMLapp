@@ -3,7 +3,7 @@ A Shiny app in R which allows researchers to build person-specific and pooled pr
 
 ## Getting started
 
-To run the app, you only need to run the following three lines of code!
+To get the app working, you only need to run the following three lines of code!
 
 ```
 devtools::install_github('nicolasleenaerts/NLMLapp')
