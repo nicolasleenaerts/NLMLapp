@@ -1,8 +1,6 @@
 elastic_net_wrapper <- function(data, outcome=NULL, predictors_con=NULL,predictors_cat=NULL, split=80, outer_cv=NULL, stratified=T,scaling=T,
                                 repeated_cv=1,ensr_cv=10,ensr_alphas=seq(0, 1, length = 10),ensr_lambdas=100,seed=404,shuffle=T,
                                 stop_train=NULL,stop_test=NULL,family='binary',pred_min=NULL,pred_max=NULL){
-  browser()
-
   # required packages
   `%!in%` = Negate(`%in%`)
 
@@ -217,7 +215,7 @@ elastic_net_wrapper <- function(data, outcome=NULL, predictors_con=NULL,predicto
     estimates = elastic_model$beta
 
     # having at least one parameter
-    while (length(which(estimates!=0))<1){
+    while (length(which(estimates[,1]!=0))<1){
       MSEs = MSEs[-1,]
       lambda.min = MSEs$lambdas[1]
       alpha.min = MSEs$alphas[1]
@@ -619,7 +617,7 @@ elastic_net_wrapper_pooled <- function(data, outcome=NULL, by=NULL,predictors_co
     estimates <- elastic_model$beta
 
     # having at least one parameter
-    while (length(which(estimates!=0))<1){
+    while (length(which(estimates[,1]!=0))<1){
       MSEs <- MSEs[-1,]
       lambda.min <- MSEs$lambdas[1]
       alpha.min <- MSEs$alphas[1]
