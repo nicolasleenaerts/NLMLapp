@@ -1,45 +1,66 @@
 NLMLapp <- function(){
+  #### Load libraries ####
+  library(bslib)
+  library(caret)
+  library(dplyr)
+  library(DT)
+  library(ensr)
+  library(forcats)
+  library(ggplot2)
+  library(glmnet)
+  library(openxlsx)
+  library(pkgload)
+  library(pROC)
+  library(readxl)
+  library(readxl)
+  library(scales)
+  library(shiny)
+  library(shinythemes)
+  library(shinyWidgets)
+  library(splitTools)
+  library(tidyr)
+
   #### Define UI ####
   ui <- fluidPage(
     # Theme of the app
-    theme=bs_theme(primary = "#3BA688", secondary = "#F39498", 
+    theme=bs_theme(primary = "#3BA688", secondary = "#F39498",
                    font_scale = NULL, preset = "minty"),
     # App title
     titlePanel(h1(HTML("Person-specific and Pooled Prediction Models <br/> with Elastic Net Regularized Regression"),align = "center")),
-    
+
     # Create panels for the sidebar
     navlistPanel(
       id = "tabset",
       # Tab 1: Uploading data
-      tabPanel("Data", 
+      tabPanel("Data",
                # Upload data
                fileInput("upload", "Upload your data set",multiple = T,accept='.csv')),
-      
+
       # Tab 2: Setting preprocessing parameters
-      tabPanel("Preprocessing",  
-               
+      tabPanel("Preprocessing",
+
                # Create bootstrap switch for either a pooled of person-specific model
                'Pick a model type',
                switchInput(inputId = "model_type",label = 'Model type',onLabel = "Pooled",offLabel = "Person-specific",value = TRUE,width= 'auto'),
-               
+
                # Conditional panels for the pooled or person-specific models
                tabsetPanel(
                  id = "switcher_pooled_person",
                  type = "hidden",
                  # Pooled model
-                 tabPanelBody("pooled", 
+                 tabPanelBody("pooled",
                               fluidRow(
                                 column(6,
                                        # Create checkboxes
-                                       pickerInput(inputId = 'predictors_within_con_pooled', label = 'Select within-person continuous predictor(s)', choices = NULL, 
+                                       pickerInput(inputId = 'predictors_within_con_pooled', label = 'Select within-person continuous predictor(s)', choices = NULL,
                                                    options = list(`actions-box` = TRUE, 'live-search' = TRUE), multiple = TRUE),
-                                       pickerInput(inputId = 'predictors_between_con_pooled', label = 'Select between-person continuous predictor(s)', choices = NULL, 
+                                       pickerInput(inputId = 'predictors_between_con_pooled', label = 'Select between-person continuous predictor(s)', choices = NULL,
                                                    options = list(`actions-box` = TRUE, 'live-search' = TRUE), multiple = TRUE),
-                                       pickerInput(inputId = 'predictors_within_cat_pooled', label = 'Select within-person categorical predictor(s)', choices = NULL, 
+                                       pickerInput(inputId = 'predictors_within_cat_pooled', label = 'Select within-person categorical predictor(s)', choices = NULL,
                                                    options = list(`actions-box` = TRUE, 'live-search' = TRUE), multiple = TRUE),
-                                       pickerInput(inputId = 'predictors_between_cat_pooled', label = 'Select between-person categorical predictor(s)', choices = NULL, 
+                                       pickerInput(inputId = 'predictors_between_cat_pooled', label = 'Select between-person categorical predictor(s)', choices = NULL,
                                                    options = list(`actions-box` = TRUE, 'live-search' = TRUE), multiple = TRUE),
-                                       pickerInput(inputId = 'outcome_pooled', label = 'Select outcome', choices = NULL, 
+                                       pickerInput(inputId = 'outcome_pooled', label = 'Select outcome', choices = NULL,
                                                    options = list(`actions-box` = TRUE, 'live-search' = TRUE), multiple = FALSE),
                                        # Split and cross-validation
                                        'Pick a split type',
@@ -86,15 +107,15 @@ NLMLapp <- function(){
                  # Person-specific model
                  tabPanelBody("person_specific",
                               fluidRow(
-                                column(6,         
+                                column(6,
                                        # Create checkboxes
-                                       pickerInput(inputId = 'predictors_con_person', label = 'Select continuous predictor(s)', choices = NULL, 
+                                       pickerInput(inputId = 'predictors_con_person', label = 'Select continuous predictor(s)', choices = NULL,
                                                    options = list(`actions-box` = TRUE, 'live-search' = TRUE), multiple = TRUE),
-                                       pickerInput(inputId = 'predictors_cat_person', label = 'Select categorical predictor(s)', choices = NULL, 
+                                       pickerInput(inputId = 'predictors_cat_person', label = 'Select categorical predictor(s)', choices = NULL,
                                                    options = list(`actions-box` = TRUE, 'live-search' = TRUE), multiple = TRUE),
-                                       pickerInput(inputId = 'outcome_person', label = 'Select outcome', choices = NULL, 
+                                       pickerInput(inputId = 'outcome_person', label = 'Select outcome', choices = NULL,
                                                    options = list(`actions-box` = TRUE, 'live-search' = TRUE), multiple = FALSE),
-                                       
+
                                        # Split and cross-validation
                                        'Pick a split type',
                                        switchInput(inputId = "split_type_person",label = 'Split type',onLabel = "Cross-validation",offLabel = "Train-test split",value = TRUE,width= 'auto'),
@@ -138,7 +159,7 @@ NLMLapp <- function(){
                                 )
                               )))),
       # Tab 3: Analysis
-      tabPanel("Model Training and Testing", 
+      tabPanel("Model Training and Testing",
                HTML('Press button to start the analyses <br/>'),
                actionButton("start_analysis", "Start!"),
                progressBar(id = "pb", value = 0, display_pct = T)),
@@ -161,7 +182,7 @@ NLMLapp <- function(){
                               dataTableOutput("results_table_person"),style = "height:800px; overflow-y: scroll;overflow-x: scroll;"
                  ))
       ),
-      tabPanel("Plots", 
+      tabPanel("Plots",
                HTML('Download plot <br/>'),
                downloadButton("download_plot"),
                HTML('<br/>'),
@@ -184,42 +205,42 @@ NLMLapp <- function(){
                plotOutput("plot_estimates"))
     )
   )
-  
+
   #### Define server logic ####
   server <- function(input, output, session) {
-    
+
     # Create reactive element for data
-    data <- reactive({ 
+    data <- reactive({
       # Waiting for input
-      req(input$upload) 
+      req(input$upload)
       # Making list of data sets
       data_lists <- list()
       for (entry in input$upload$datapath){
         data_lists[[length(data_lists)+1]]<-read.csv(entry)
-      } 
+      }
       # Returning list of data sets
       data_lists
     })
-    
+
     # Create reactive elements for split/CV
     split <- reactiveValues(value = NA)
     ext_cv_folds <- reactiveValues(value = NA)
-    
+
     # Create reactive elements for results
     results_person <- reactiveValues(results = data.frame(NA),results_ranked=data.frame(NA),
                                      results_metrics_average = data.frame(NA),results_metrics_median = data.frame(NA))
     results_pooled <- reactiveValues(results_estimates = data.frame(NA),results_estimates_ranked = data.frame(NA), results_metrics = data.frame(NA),
                                      results_metrics_average = data.frame(NA),results_metrics_median = data.frame(NA))
-    
+
     # Switch preprocessing panels for model type
     observeEvent(input$model_type, {
       updateTabsetPanel(inputId = "switcher_pooled_person", selected = ifelse(input$model_type,'pooled','person_specific'))
     })
-    
+
     # Switch preprocessing panels for split/CV
     observeEvent(input$split_type_pooled, {
       updateTabsetPanel(inputId = "switcher_split_pooled", selected = ifelse(input$split_type_pooled,'cv_pooled','split_pooled'))
-      if(input$split_type_pooled==T){  
+      if(input$split_type_pooled==T){
         split$value <- NULL
         ext_cv_folds$value <- input$nfolds_pooled}
       else{
@@ -228,14 +249,14 @@ NLMLapp <- function(){
     })
     observeEvent(input$split_type_person, {
       updateTabsetPanel(inputId = "switcher_split_person", selected = ifelse(input$split_type_person,'cv_person','split_person'))
-      if(input$split_type_person==T){  
+      if(input$split_type_person==T){
         split$value <- NULL
         ext_cv_folds$value <- input$nfolds_person}
       else{
         split$value <- input$split_percentage_person
         ext_cv_folds$value <-NULL}
     })
-    
+
     # Switch preprocessing panels for family
     observeEvent(input$family_pooled, {
       updateTabsetPanel(inputId = "switcher_family_pooled", selected = ifelse(input$family_pooled,'binary_family_pooled','continuous_family_pooled'))
@@ -243,7 +264,7 @@ NLMLapp <- function(){
     observeEvent(input$family_person, {
       updateTabsetPanel(inputId = "switcher_family_person", selected = ifelse(input$family_person,'binary_family_person','continuous_family_person'))
     })
-    
+
     # Update selection list for predictors and outcome
     observe({
       # Create common predictors
@@ -252,16 +273,16 @@ NLMLapp <- function(){
         predictors<- intersect(predictors, colnames(data()[[i]]))
       }
       # Update predictor selectors
-      updatePickerInput(session, 'predictors_con_person', choices = predictors)   
-      updatePickerInput(session, 'predictors_cat_person', choices = predictors)   
-      updatePickerInput(session, 'predictors_within_con_pooled', choices = predictors)   
-      updatePickerInput(session, 'predictors_within_cat_pooled', choices = predictors) 
-      updatePickerInput(session, 'predictors_between_con_pooled', choices = predictors)   
-      updatePickerInput(session, 'predictors_between_cat_pooled', choices = predictors) 
+      updatePickerInput(session, 'predictors_con_person', choices = predictors)
+      updatePickerInput(session, 'predictors_cat_person', choices = predictors)
+      updatePickerInput(session, 'predictors_within_con_pooled', choices = predictors)
+      updatePickerInput(session, 'predictors_within_cat_pooled', choices = predictors)
+      updatePickerInput(session, 'predictors_between_con_pooled', choices = predictors)
+      updatePickerInput(session, 'predictors_between_cat_pooled', choices = predictors)
       updatePickerInput(session, 'outcome_person', choices = predictors)
-      updatePickerInput(session, 'outcome_pooled', choices = predictors)  
+      updatePickerInput(session, 'outcome_pooled', choices = predictors)
     })
-    
+
     # Run analyses
     observeEvent(input$start_analysis, {
       # Perform pooled analyses
@@ -292,13 +313,13 @@ NLMLapp <- function(){
         results_pooled$results_metrics_median <- aggregate(dplyr::select(results_model$results_by,-c('by','fold')),list(by=results_model$results_by$by),median,na.rm=T)
         results_pooled$results_metrics_median$type <- 'median'
         results_pooled$results_metrics_median <- aggregate(dplyr::select(results_pooled$results_metrics_median,-c('by','type')),list(type=results_pooled$results_metrics_median$type),median,na.rm=T)
-        
+
         # Rename columns
         results_pooled$results_metrics <- results_pooled$results_metrics %>%
           dplyr::rename(
             participant = by
           )
-        
+
         # Create ranked results
         results_pooled$results_estimates_ranked <- results_pooled$results_estimates
         results_pooled$results_estimates_ranked[,c(input$predictors_within_con_pooled,input$predictors_between_con_pooled,input$predictors_within_cat_pooled,input$predictors_between_cat_pooled)] <- coefficient_ranker(results_pooled$results_estimates_ranked[,c(input$predictors_within_con_pooled,input$predictors_between_con_pooled,input$predictors_within_cat_pooled,input$predictors_between_cat_pooled)])
@@ -329,22 +350,22 @@ NLMLapp <- function(){
         results_person$results_metrics_median <- aggregate(dplyr::select(results_all,-c('entry','fold')),list(entry=results_all$entry),median,na.rm=T)
         results_person$results_metrics_median$type <- 'median'
         results_person$results_metrics_median <- aggregate(dplyr::select(results_person$results_metrics_median,-c('entry','type')),list(type=results_person$results_metrics_median$type),median,na.rm=T)
-        
+
         # Reorder columns
         results_person$results <- results_person$results[,c(ncol(results_person$results),1:(ncol(results_person$results)-1))]
-        
+
         # Rename columns
         results_person$results <- results_person$results %>%
           dplyr::rename(
             participant = entry
           )
-        
+
         # Create ranked results
         results_person$results_ranked <- results_person$results
         results_person$results_ranked[,c(input$predictors_con_person,input$predictors_cat_person)] <- coefficient_ranker(results_person$results_ranked[,c(input$predictors_con_person,input$predictors_cat_person)])
       }
     })
-    
+
     # Show table
     observeEvent(input$model_type, {
       # Switch panels
@@ -353,7 +374,7 @@ NLMLapp <- function(){
       if (input$model_type==T){
         # Show table
         output$results_table_pooled_average <- renderDataTable({
-          datatable(rbind(results_pooled$results_metrics_average,results_pooled$results_metrics_median), 
+          datatable(rbind(results_pooled$results_metrics_average,results_pooled$results_metrics_median),
                     options = list(paging = FALSE),caption = htmltools::tags$caption( style = 'caption-side: top; color:black;  font-size:150% ;','Table 1: Average and median of the metrics'))
         })
         output$results_table_pooled_metrics <- renderDataTable({
@@ -377,67 +398,67 @@ NLMLapp <- function(){
         })
       }
     })
-    
+
     # Download data pooled
     output$download_pooled <- downloadHandler(
       filename = function() {'results_pooled.xlsx'},
       content = function(file) {
         # Create workbook
         OUT <- createWorkbook()
-        
+
         # Add some sheets to the workbook
         addWorksheet(OUT, "average_metrics")
         addWorksheet(OUT, "full_metrics")
         addWorksheet(OUT, "full_estimates")
-        
+
         # Write the data to the sheets
         writeData(OUT, sheet = "average_metrics", x = rbind(results_pooled$results_metrics_average,results_pooled$results_metrics_median))
         writeData(OUT, sheet = "full_metrics", x = results_pooled$results_metrics)
         writeData(OUT, sheet = "full_estimates", x = results_pooled$results_estimates)
-        
+
         # Export the file
         saveWorkbook(OUT, file)
       }
     )
-    
+
     # Download data person
     output$download_person <- downloadHandler(
       filename = function() {'results_person.xlsx'},
       content = function(file) {
         # Create workbook
         OUT <- createWorkbook()
-        
+
         # Add some sheets to the workbook
         addWorksheet(OUT, "average_metrics_and_estimated")
         addWorksheet(OUT, "full_metrics_and_estmates")
-        
+
         # Write the data to the sheets
         writeData(OUT, sheet = "average_metrics_and_estimated", x = rbind(results_person$results_metrics_average,results_person$results_metrics_median))
         writeData(OUT, sheet = "full_metrics_and_estmates", x = results_person$results)
-        
+
         # Export the file
         saveWorkbook(OUT, file)
       }
     )
-    
+
     # Create reactive elements for plots
     plot_estimates_pooled_parametric <- reactive({
       NLML_plot(data.frame(t(apply(dplyr::select(results_pooled$results_estimates,c(input$predictors_within_con_pooled,input$predictors_between_con_pooled,
                                                                                     input$predictors_within_cat_pooled,input$predictors_between_cat_pooled)),2,mean,na.rm=T))),
                 percentile = input$percentile,range = input$range,title = input$title,subtitle = input$subtitle,
-                xlim = input$xlim,ylab = input$ylab,xlab = input$xlab,gradient_values = seq(from=input$gradient[1],to=input$gradient[2],length.out=11))}) 
-    
+                xlim = input$xlim,ylab = input$ylab,xlab = input$xlab,gradient_values = seq(from=input$gradient[1],to=input$gradient[2],length.out=11))})
+
     plot_estimates_pooled_nonparametric <- reactive({
       NLML_plot(dplyr::select(aggregate(dplyr::select(results_person$results,-c('participant','fold')),list(participant=results_person$results$participant),mean,na.rm=T),c(input$predictors_con_person,input$predictors_cat_person)),
                 percentile = input$percentile,range = input$range,title = input$title,subtitle = input$subtitle,
                 xlim = input$xlim,ylab = input$ylab,xlab = input$xlab,gradient_values = seq(from=input$gradient[1],to=input$gradient[2],length.out=11))})
-    
+
     plot_estimates_person_parametric <- reactive({
       NLML_plot_ranked_split(data.frame(t(apply(dplyr::select(results_pooled$results_estimates_ranked,c(input$predictors_within_con_pooled,input$predictors_between_con_pooled,
                                                                                                         input$predictors_within_cat_pooled,input$predictors_between_cat_pooled)),2,mean,na.rm=T))),
                              percentile = input$percentile,range = input$range,title = input$title,subtitle = input$subtitle,
                              xlim = input$xlim,ylab = input$ylab,xlab = input$xlab,gradient_values = seq(from=input$gradient[1],to=input$gradient[2],length.out=11))})
-    
+
     plot_estimates_person_nonparametric <- reactive({
       NLML_plot_ranked_split(dplyr::select(aggregate(dplyr::select(results_person$results_ranked,-c('participant','fold')),list(participant=results_person$results_ranked$participant),mean,na.rm=T),c(input$predictors_con_person,input$predictors_cat_person)),
                              percentile = input$percentile,range = input$range,title = input$title,subtitle = input$subtitle,
@@ -464,7 +485,7 @@ NLMLapp <- function(){
         }
       })
     })
-    
+
     # Download plot
     observeEvent(req(input$tabset == 'Plots'),{
       output$download_plot <- downloadHandler(
@@ -491,7 +512,7 @@ NLMLapp <- function(){
         })
     })
   }
-  
+
   #### Run the application ####
   shinyApp(ui = ui, server = server)
 }
