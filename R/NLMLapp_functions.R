@@ -1,7 +1,7 @@
 elastic_net_wrapper <- function(data, outcome=NULL, predictors_con=NULL,predictors_cat=NULL, split=80, outer_cv=NULL, stratified=T,scaling=T,
                                 repeated_cv=1,ensr_cv=10,ensr_alphas=seq(0, 1, length = 10),ensr_lambdas=100,seed=404,shuffle=T,
                                 stop_train=NULL,stop_test=NULL,family='binary',pred_min=NULL,pred_max=NULL){
-  borwser()
+  browser()
 
   # required packages
   `%!in%` = Negate(`%in%`)
