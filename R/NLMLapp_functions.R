@@ -769,14 +769,14 @@ NLML_plot <- function(results_estimates,percentile=0.90,range=TRUE,title=NULL,su
   
   # Add 95% segments
   if (range==TRUE){
-    base_plot <- base_plot + geom_segment(aes(x=P025,xend=P975,yend=variable,color=mean_estimate),size=3)
+    base_plot <- base_plot + geom_segment(aes(x=P025,xend=P975,yend=variable,color=mean_estimate),linewidth=3)
   }
   
   # Finish plot
   plot <- base_plot +
     
     # Add 0 line
-    geom_vline(xintercept = 0, lty = 2, size = 0.2) +
+    geom_vline(xintercept = 0, lty = 2, linewidth = 0.2) +
     
     # Add means
     geom_point(aes(fill = mean_estimate),pch = 21,size=3) +
@@ -852,14 +852,14 @@ NLML_plot_ranked_split <- function(results_estimates,percentile=0.90,range=TRUE,
   
   # Add 95% segments
   if (range==TRUE){
-    base_plot <- base_plot + geom_segment(aes(x=P025,xend=P975,yend=variable,color=mean_estimate),size=3)
+    base_plot <- base_plot + geom_segment(aes(x=P025,xend=P975,yend=variable,color=mean_estimate),linewidth=3)
   }
   
   # Finish plot
   plot <- base_plot +
     
     # Add 0 line
-    geom_vline(xintercept = 0, lty = 2, size = 0.2) +
+    geom_vline(xintercept = 0, lty = 2, linewidth = 0.2) +
     
     # Add means
     geom_point(aes(fill = mean_estimate),pch = 21,size=3) +
