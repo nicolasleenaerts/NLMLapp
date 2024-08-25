@@ -97,6 +97,8 @@ NLMLapp <- function(){
                                          id = "switcher_family_pooled",
                                          type = "hidden",
                                          tabPanelBody("binary_family_pooled",
+                                                      'Pick the focus of the models',
+                                                      switchInput(inputId = "prefer_sensitivity_pooled",label = 'Preference',onLabel = "Sensitivity",offLabel = "Specificity",value = TRUE,width= 'auto'),
                                                       numericInput("stop_train_pooled", "Minimum number of positive observations in the training data", value = 5),
                                                       numericInput("stop_test_pooled", "Minimum number of positive observations in the testing data", value = 1)),
                                          tabPanelBody("continuous_family_pooled",
@@ -151,6 +153,8 @@ NLMLapp <- function(){
                                          id = "switcher_family_person",
                                          type = "hidden",
                                          tabPanelBody("binary_family_person",
+                                                      'Pick the focus of the models',
+                                                      switchInput(inputId = "prefer_sensitivity_person",label = 'Preference',onLabel = "Sensitivity",offLabel = "Specificity",value = TRUE,width= 'auto'),
                                                       numericInput("stop_train_person", "Minimum number of positive observations in the training data", value = 5),
                                                       numericInput("stop_test_person", "Minimum number of positive observations in the testing data", value = 1)),
                                          tabPanelBody("continuous_family_person",
@@ -299,7 +303,8 @@ NLMLapp <- function(){
                                                     between_predictors_con = input$predictors_between_con_pooled,between_predictors_cat = input$predictors_between_cat_pooled,
                                                     outcome=input$outcome_pooled,split=split$value_pooled, outer_cv=ext_cv_folds$value_pooled, stratified=input$stratified_pooled,scaling=input$scaled_pooled,
                                                     repeated_cv=input$repeated_cv_pooled,ensr_cv=input$ensr_cv_pooled,ensr_alphas=seq(0, 1, length = input$nalphas_pooled),ensr_lambdas=input$nlambdas_pooled,seed=input$seed_pooled,
-                                                    shuffle=input$shuffle_pooled,stop_test=input$stop_test_pooled,family=ifelse(input$family_pooled,'binary','continuous'),pred_min=input$pred_min_pooled,pred_max=input$pred_max_pooled)
+                                                    shuffle=input$shuffle_pooled,stop_test=input$stop_test_pooled,family=ifelse(input$family_pooled,'binary','continuous'),
+                                                    pred_min=input$pred_min_pooled,pred_max=input$pred_max_pooled,prefer_sensitivity=input$prefer_sensitivity_pooled)
         updateProgressBar(session = session, id = "pb", value = 100)
         # Return results
         results_pooled$results_estimates <- results_model$results_pooled_model
@@ -341,7 +346,7 @@ NLMLapp <- function(){
                                                outcome=input$outcome_person,split=split$value_person, outer_cv=ext_cv_folds$value_person, stratified=input$stratified_person,scaling=input$scaled_person,
                                                repeated_cv=input$repeated_cv_person,ensr_cv=input$ensr_cv_person,ensr_alphas=seq(0, 1, length = input$nalphas_person),ensr_lambdas=input$nlambdas_person,seed=input$seed_person,
                                                shuffle=input$shuffle_person,stop_train=input$stop_train_person,stop_test=input$stop_test_person,family=ifelse(input$family_person,'binary','continuous'),
-                                               pred_min=input$pred_min_person,pred_max=input$pred_max_person)
+                                               pred_min=input$pred_min_person,pred_max=input$pred_max_person,prefer_sensitivity=input$prefer_sensitivity_person)
           updateProgressBar(session = session, id = "pb", value = (entry/length(data_to_analyse()))*100)
           # Store the results
           if (nrow(results_model$metrics)!=0){

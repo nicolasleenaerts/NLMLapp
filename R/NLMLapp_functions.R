@@ -1,6 +1,6 @@
 elastic_net_wrapper <- function(data, outcome=NULL, predictors_con=NULL,predictors_cat=NULL, split=80, outer_cv=NULL, stratified=T,scaling=T,
                                 repeated_cv=1,ensr_cv=10,ensr_alphas=seq(0, 1, length = 10),ensr_lambdas=100,seed=404,shuffle=T,
-                                stop_train=NULL,stop_test=NULL,family='binary',pred_min=NULL,pred_max=NULL){
+                                stop_train=NULL,stop_test=NULL,family='binary',pred_min=NULL,pred_max=NULL,prefer_sensitivity=T){
   # required packages
   `%!in%` = Negate(`%in%`)
 
@@ -125,7 +125,6 @@ elastic_net_wrapper <- function(data, outcome=NULL, predictors_con=NULL,predicto
 
   # Training and testing the elastic net
   for (entry in 1:length(analysis_list)){
-
     # getting the training and testing data
     y_train_entry = analysis_list[[entry]][[1]]
     y_test_entry= analysis_list[[entry]][[2]]
@@ -232,19 +231,27 @@ elastic_net_wrapper <- function(data, outcome=NULL, predictors_con=NULL,predicto
     }
 
     if (family=='binary'){
-      # AUC, sensitivity, specificity
+      # AUC
       predictions = predict(elastic_model, newx=x_test_entry,type = "response")
       model_roc =  roc(unlist(y_test_entry),as.numeric(predictions),direction="<",quiet=T)
       model_coords = coords(model_roc,"best", ret=c("threshold", "specificity", "sensitivity"), transpose=FALSE)
       model_auc = auc(model_roc)
-      ifelse( nrow(model_coords[2])>1,model_spec <- NA, model_spec <- model_coords[2])
-      ifelse( nrow(model_coords[2])>1,model_sens <- NA, model_sens <- model_coords[3])
+
+      # Sensitivity and specificity
+      if (prefer_sensitivity==T){
+        coords_to_pick = which(model_coords$sensitivity==max(model_coords$sensitivity))
+      }
+      else {
+        coords_to_pick = which(model_coords$specificity==max(model_coords$specificity))
+      }
+      model_spec <- model_coords[coords_to_pick,2]
+      model_sens <- model_coords[coords_to_pick,3]
 
       # store predictions
       predictions_all[test_indices[[entry]]] = predictions
 
       # accuracy, PPV, NPV
-      predictions_bin = ifelse(predictions>model_coords$threshold,1,0)
+      predictions_bin = ifelse(predictions>model_coords$threshold[coords_to_pick],1,0)
       confmatrix <- confusionMatrix(as.factor(predictions_bin),as.factor(unlist(y_test_entry)),positive='1')
 
       # storing metrics
@@ -327,7 +334,7 @@ elastic_net_wrapper_pooled <- function(data, outcome=NULL, by=NULL,predictors_co
                                        between_predictors_con=NULL,between_predictors_cat=NULL,
                                        split=80, outer_cv=NULL,stratified=T,scaling=T,repeated_cv=1,ensr_cv=10,
                                        ensr_alphas=seq(0, 1, length = 10),ensr_lambdas=100,seed=404,
-                                       stop_test=NULL,shuffle=F,family='binary',pred_min=NULL,pred_max=NULL){
+                                       stop_test=NULL,shuffle=F,family='binary',pred_min=NULL,pred_max=NULL,prefer_sensitivity=T){
   # required packages
   `%!in%` = Negate(`%in%`)
 
@@ -677,16 +684,24 @@ elastic_net_wrapper_pooled <- function(data, outcome=NULL, by=NULL,predictors_co
       }
 
       if (family=='binary'){
-        # AUC, sensitivity, specificity
+        # AUC
         predictions = predict(elastic_model, newx=x_test_by,type = "response")
         model_roc =  roc(unlist(y_test_by),as.numeric(predictions),direction="<",quiet=T)
         model_coords = coords(model_roc,"best", ret=c("threshold", "specificity", "sensitivity"), transpose=FALSE)
         model_auc = auc(model_roc)
-        ifelse(nrow(model_coords[2])>1,model_spec <- NA, model_spec <- model_coords[2])
-        ifelse(nrow(model_coords[2])>1,model_sens <- NA, model_sens <- model_coords[3])
+
+        # Sensitivity and specificity
+        if (prefer_sensitivity==T){
+          coords_to_pick = which(model_coords$sensitivity==max(model_coords$sensitivity))
+        }
+        else {
+          coords_to_pick = which(model_coords$specificity==max(model_coords$specificity))
+        }
+        model_spec <- model_coords[coords_to_pick,2]
+        model_sens <- model_coords[coords_to_pick,3]
 
         # accuracy, PPV, NPV
-        predictions_bin = ifelse(predictions>model_coords$threshold,1,0)
+        predictions_bin = ifelse(predictions>model_coords$threshold[coords_to_pick],1,0)
         confmatrix <- confusionMatrix(as.factor(predictions_bin),as.factor(unlist(y_test_by)),positive='1')
 
         # storing metrics
