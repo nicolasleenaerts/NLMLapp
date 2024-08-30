@@ -15,7 +15,7 @@ NLMLapp()
 
 ## Materials
 
-Need a tutorial on how to use the app? Then watch this [YouTube vide](https://youtu.be/9tB9n4Njwz0)!
+Need a tutorial on how to use the app? Then watch this [YouTube video](https://youtu.be/9tB9n4Njwz0)!
 
 Looking for information on the scripts? Consult the wiki of the NLML github repository!
 
