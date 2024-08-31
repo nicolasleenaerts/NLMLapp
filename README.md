@@ -17,6 +17,12 @@ NLMLapp()
 
 Need a tutorial on how to use the app? Then watch this [YouTube video](https://youtu.be/9tB9n4Njwz0)!
 
+### Uploading data
+
+On the 'Data' page, you need to upload all the files you want to analyze. Importantly, the files need to be .xlsx files. They also need to be complete, meaning that they can't contain any missing data. If you have missing data that you want to deal with. Go to the [NLML repository]([Elastic Net/Multiple Imputation](https://github.com/nicolasleenaerts/NLML/tree/main/Elastic%20Net/Multiple%20Imputation)). 
+
+
+
 Looking for information on the scripts? Consult the wiki of the NLML github repository!
 
 [NLML WIKI](https://github.com/mikojeske/NLML/wiki/)
