@@ -21,7 +21,7 @@ Need a tutorial on how to use the app? Then watch this [YouTube video](https://y
 
 You need to upload all the files you want to analyze on the 'Data' page. Importantly, the files need to be .xlsx files. They also need to be complete, meaning that they can't contain any missing data. If you have missing data that you want to deal with. Go to the [NLML repository](https://github.com/nicolasleenaerts/NLML/tree/main/Elastic%20Net/Multiple%20Imputation). 
 
-[Images/NLML_Data.png](https://github.com/nicolasleenaerts/NLML/blob/main/Images/NLML_Data.png?raw=true)
+![Images/NLML_Data.png](https://github.com/nicolasleenaerts/NLML/blob/main/Images/NLML_Data.png?raw=true)
 
 ### Preprocessing
 
