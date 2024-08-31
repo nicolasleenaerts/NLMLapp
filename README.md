@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/c1f803a6-06c7-42a3-a924-a120f14272cc)# NLMLapp
+# NLMLapp
 A Shiny app in R which allows researchers to build person-specific and pooled prediction models with elastic net regularized regression. Based on the functions from the NLML repository.
 
 The app is still in beta, so if you run into any problems, be sure to mention them in the issues tab, or send me an email at nicolas.leenaerts@kuleuven.be.
