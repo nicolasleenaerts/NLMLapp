@@ -27,7 +27,7 @@ You need to upload all the files you want to analyze on the 'Data' page. Importa
 
 On the 'Preprocessing' page, you need to specificy whether you want to build a pooled prediction model or whether you want to make seperate person-specific ones. Also, you need to specificy how you want the model to be built and evaluated (e.g., cross-validation or a train-test split).
 
-Looking for information on the options? Consult the wiki of the NLML github repository! [NLML WIKI](https://github.com/mikojeske/NLML/wiki/)
+Looking for information on the options? Consult the wiki of the NLML github repository! [NLML WIKI](https://github.com/mikojeske/NLML/wiki/Elastic-Net-Wrappers)
 
 ![NLML_Preprocessing.png](https://github.com/nicolasleenaerts/NLML/blob/main/Images/NLML_Preprocessing.png?raw=true)
 
