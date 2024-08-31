@@ -19,10 +19,25 @@ Need a tutorial on how to use the app? Then watch this [YouTube video](https://y
 
 ### Uploading data
 
-On the 'Data' page, you need to upload all the files you want to analyze. Importantly, the files need to be .xlsx files. They also need to be complete, meaning that they can't contain any missing data. If you have missing data that you want to deal with. Go to the [NLML repository]([Elastic Net/Multiple Imputation](https://github.com/nicolasleenaerts/NLML/tree/main/Elastic%20Net/Multiple%20Imputation)). 
+You need to upload all the files you want to analyze on the 'Data' page. Importantly, the files need to be .xlsx files. They also need to be complete, meaning that they can't contain any missing data. If you have missing data that you want to deal with. Go to the [NLML repository](https://github.com/nicolasleenaerts/NLML/tree/main/Elastic%20Net/Multiple%20Imputation). 
+
+### Preprocessing
+
+On the 'Preprocessing' page, you need to specificy whether you want to build a pooled prediction model or whether you want to make seperate person-specific ones. Also, you need to specificy how you want the model to be built and evaluated (e.g., cross-validation or a train-test split).
+
+Looking for information on the options? Consult the wiki of the NLML github repository! [NLML WIKI](https://github.com/mikojeske/NLML/wiki/)
+
+### Analyses
+
+After you have specified which model you want to build and how you want to train and test it, press 'Start' on the 'Model Training and Testing' page to run the analyses.
+
+### Results
+
+You can look at the results and download them on the 'Results' page.
+
+### Plots
+
+On the 'Plots' page you can make a plot showing a certain percentage of best predictors and how predictive they are. You can make a parametric plot, where the raw estimates of the elastic net regularized regression models are averaged across participants, or you can make a nonparametric plot, where the estimates are first converted into ranks (e.g., highest positive estimate becomes 1, the second highest 2, highest negative becomes -1, etc.) and then averaged across participants. 
 
 
 
-Looking for information on the scripts? Consult the wiki of the NLML github repository!
-
-[NLML WIKI](https://github.com/mikojeske/NLML/wiki/)
